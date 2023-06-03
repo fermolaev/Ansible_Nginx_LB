@@ -1,0 +1,12 @@
+#----------| Digital Ocean Droplet + SSH |------------
+do_token   = ""
+ssh        = ""
+ssh_path   = ""
+ssh_privat = ""
+task_email = ["task_name:terraform-05", "user_email:len1256_at_mail_ru"]
+easy_pass  = ""
+devs       = [""]
+#----------| AWS 53 DNS |------------
+dns_name   = ""
+aws_access = ""
+aws_secret = ""

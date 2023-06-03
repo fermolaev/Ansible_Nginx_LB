@@ -1,0 +1,28 @@
+#Клчюи авторизации/серты
+*.pub
+*.ppk
+*.pem
+*.pum
+*.rsa
+REBRAIN.SSH.PUB.KEY
+
+#Переменные для разверывания
+*.tfvars
+*.tfvars.json
+
+#Файлы состояния с сикретами
+*.tfstate.backup
+*.tfstate
+.terraformrc
+terraform.rc
+override.tf
+override.tf.json
+*_override.tf
+*_override.tf.json
+
+#Логи
+crash.log
+crash.*.log
+
+#Дирректория терраформа
+**/.terraform/*
