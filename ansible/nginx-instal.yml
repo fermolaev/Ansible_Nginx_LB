@@ -1,8 +1,13 @@
 ---
 - hosts: nginx
   tasks:
-    - name: "Install nginx via apt"
+    - name: Install Nginx
       ansible.builtin.apt:
-        name: "nginx"
-        state: "latest"
+        name: nginx
+        state: present
         update_cache: true
+    - name: Enable Nginx
+      ansible.builtin.systemd:
+        state: started
+        name: nginx
+        enabled: true
