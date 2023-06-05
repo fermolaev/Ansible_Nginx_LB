@@ -1,13 +1,52 @@
 ---
 - hosts: nginx
+  vars:
+    nginx_sites: /etc/nginx/sites-available
+    sites_link: /etc/nginx/sites-enabled
+
   tasks:
     - name: Install Nginx
-      ansible.builtin.apt:
+      apt:
         name: nginx
         state: present
         update_cache: true
+
     - name: Enable Nginx
-      ansible.builtin.systemd:
-        state: started
+      systemd:
         name: nginx
+        state: started
         enabled: true
+
+    - name: Delete default nginx vhost
+      file:
+        path={{ nginx_sites }}/default
+        state=absent
+
+    - name: Setup nginx conf
+      template:
+        src=/root/nginx.conf.j2
+        dest=/etc/nginx/nginx.conf
+        
+    - name: Setup nginx vhost
+      template:
+        src={{ item.src }}
+        dest={{ item.dest }}
+      loop:
+        - { src: '/root/fetest.j2', dest: '{{ nginx_sites }}/fetest.conf' }
+        - { src: '/root/fetest_rezerv.j2', dest: '{{ nginx_sites }}/fetest_rezerv.conf' }
+
+    - name: Create symlink nginx vhost
+      file:
+        src={{ item.src }}
+        dest={{ item.dest }}
+        state=link
+      loop:
+        - { src: '{{ nginx_sites }}/fetest.conf', dest: '{{ sites_link }}/fetest.conf' }
+        - { src: '{{ nginx_sites }}/fetest_rezerv.conf', dest: '{{ sites_link }}/fetest_rezerv.conf' }        
+      notify: reload nginx
+
+  handlers:
+    - name: reload nginx
+      service:
+        name=nginx
+        state=reloaded
