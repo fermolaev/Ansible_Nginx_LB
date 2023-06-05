@@ -136,6 +136,20 @@ resource "digitalocean_droplet" "ansible" {
     destination = "/tmp/key.pem"
   }
 
+  provisioner "file" {
+    source      = "${path.module}/ansible/nginx/fetest.j2"
+    destination = "/root/fetest.j2"
+  }
+
+  provisioner "file" {
+    source      = "${path.module}/ansible/nginx/fetest_rezerv.j2"
+    destination = "/root/fetest_rezerv.j2"
+  }
+
+  provisioner "file" {
+    source      = "${path.module}/ansible/nginx/nginx.conf.j2"
+    destination = "/root/nginx.conf.j2"
+  }
   provisioner "remote-exec" {
     inline = [
       "apt install ansible -y ",
@@ -145,5 +159,6 @@ resource "digitalocean_droplet" "ansible" {
       "ansible-playbook nginx-instal.yml -i /root/hosts.yaml  --ssh-common-args='-o StrictHostKeyChecking=no'",
     ]
   }
+
 }
 
