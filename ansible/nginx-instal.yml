@@ -24,9 +24,9 @@
 
     - name: Setup nginx conf
       template:
-        src=/root/nginx.conf.j2
-        dest=/etc/nginx/nginx.conf
-        
+        src=./nginx.conf.j2
+        dest={{ nginx_sites }}
+
     - name: Setup nginx vhost
       template:
         src={{ item.src }}
@@ -43,10 +43,10 @@
       loop:
         - { src: '{{ nginx_sites }}/fetest.conf', dest: '{{ sites_link }}/fetest.conf' }
         - { src: '{{ nginx_sites }}/fetest_rezerv.conf', dest: '{{ sites_link }}/fetest_rezerv.conf' }        
-      notify: reload nginx
+      notify: restart nginx
 
   handlers:
-    - name: reload nginx
+    - name: restart nginx
       service:
         name=nginx
-        state=reloaded
+        state=restarted

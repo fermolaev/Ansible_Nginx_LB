@@ -9,7 +9,7 @@ map $sent_http_content_type $expires {
 server {
   listen 80 default_server;
   listen [::]:80 default_server;
-  server_name {{ ansible_hostname }};
+  server_name {{ ansible_hostname }}.devops.rebrain.srwx.net ;
 
   expires $expires;
 }
