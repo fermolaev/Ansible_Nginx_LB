@@ -156,9 +156,11 @@ resource "digitalocean_droplet" "ansible" {
       "eval `ssh-agent -s`",
       "chmod 400 /tmp/key.pem",
       "ssh-add /tmp/key.pem",
-      "ansible-playbook nginx-instal.yml -i /root/hosts.yaml  --ssh-common-args='-o StrictHostKeyChecking=no'",
+      "ansible-galaxy init nginx_install",
+      "ansible-galaxy init nginx_sites",
     ]
   }
 
 }
 
+#"ansible-playbook nginx-instal.yml -i /root/hosts.yaml  --ssh-common-args='-o StrictHostKeyChecking=no'",
