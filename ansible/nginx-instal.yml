@@ -27,6 +27,7 @@
       template:
         src=./nginx.conf.j2
         dest=/etc/nginx/nginx.conf
+      notify: reloaded nginx
 
     - name: Setup nginx vhost
       template:
@@ -35,6 +36,7 @@
       loop:
         - { src: './fetest.j2', dest: '{{ nginx_sites }}/fetest.conf' }
         - { src: './fetest_rezerv.j2', dest: '{{ nginx_sites }}/fetest_rezerv.conf' }
+      notify: reloaded nginx
 
     - name: Create symlink nginx vhost
       file:
@@ -44,10 +46,9 @@
       loop:
         - { src: '{{ nginx_sites }}/fetest.conf', dest: '{{ sites_link }}/fetest.conf' }
         - { src: '{{ nginx_sites }}/fetest_rezerv.conf', dest: '{{ sites_link }}/fetest_rezerv.conf' }        
-      notify: restart nginx
 
   handlers:
-    - name: restart nginx
+    - name: reloaded nginx
       service:
         name=nginx
-        state=restarted
+        state=reloaded
