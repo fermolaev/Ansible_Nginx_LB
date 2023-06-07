@@ -1,0 +1,44 @@
+---
+# tasks file for nginx_install
+- name: Install Nginx
+  apt:
+    name: nginx
+    state: present
+    update_cache: true
+
+- name: Enable Nginx
+  systemd:
+    name: nginx
+    state: started
+    enabled: true
+      
+- name: Delete default nginx vhost
+  file:
+    path={{ nginx_sites }}/default
+    state=absent
+  notify: reloaded nginx
+
+- name: Setup nginx conf
+  template:
+    src=nginx.conf.j2
+    dest=/etc/nginx/nginx.conf
+  notify: reloaded nginx
+
+- name: Setup nginx vhost
+  template:
+    src={{ item.src }}
+    dest={{ item.dest }}
+  loop:
+    - { src: 'fetest.j2', dest: '{{ nginx_sites }}/fetest.conf' }
+    - { src: 'fetest_rezerv.j2', dest: '{{ nginx_sites }}/fetest_rezerv.conf' }
+  notify: reloaded nginx
+
+- name: Create symlink nginx vhost
+  file:
+    src={{ item.src }}
+    dest={{ item.dest }}
+    state=link
+  loop:
+    - { src: '{{ nginx_sites }}/fetest.conf', dest: '{{ sites_link }}/fetest.conf' }
+    - { src: '{{ nginx_sites }}/fetest_rezerv.conf', dest: '{{ sites_link }}/fetest_rezerv.conf' }
+  notify: reloaded nginx

@@ -122,11 +122,6 @@ resource "digitalocean_droplet" "ansible" {
   }
 
   provisioner "file" {
-    source      = "${path.module}/ansible/nginx-instal.yml"
-    destination = "/root/nginx-instal.yml"
-  }
-
-  provisioner "file" {
     source      = "${path.module}/ansible/nginx/hosts.yaml"
     destination = "/root/hosts.yaml"
   }
@@ -136,20 +131,6 @@ resource "digitalocean_droplet" "ansible" {
     destination = "/tmp/key.pem"
   }
 
-  provisioner "file" {
-    source      = "${path.module}/ansible/nginx/fetest.j2"
-    destination = "/root/fetest.j2"
-  }
-
-  provisioner "file" {
-    source      = "${path.module}/ansible/nginx/fetest_rezerv.j2"
-    destination = "/root/fetest_rezerv.j2"
-  }
-
-  provisioner "file" {
-    source      = "${path.module}/ansible/nginx/nginx.conf.j2"
-    destination = "/root/nginx.conf.j2"
-  }
   provisioner "remote-exec" {
     inline = [
       "apt install ansible -y ",
@@ -157,7 +138,6 @@ resource "digitalocean_droplet" "ansible" {
       "chmod 400 /tmp/key.pem",
       "ssh-add /tmp/key.pem",
       "ansible-galaxy init nginx_install",
-      "ansible-galaxy init nginx_sites",
     ]
   }
 
