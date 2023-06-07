@@ -8,7 +8,10 @@ map $sent_http_content_type $expires {
 
 server {
 
-  listen 80 default_server;
+  {% for port in ports %}
+  listen {{ port }} default_server;
+  {% endfor %}
+
   {% for port in ports %}
   listen [::]:{{ port }} default_server;
   {% endfor %}
