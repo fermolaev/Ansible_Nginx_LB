@@ -1,5 +1,5 @@
 user www-data;
-worker_processes auto;
+worker_processes {{ ansible_processor_vcpus }};
 pid /run/nginx.pid;
 error_log  /var/log/nginx/{{ ansible_hostname }}-error.log;
 
@@ -22,4 +22,5 @@ http {
     '$request_time $upstream_response_time $pipe';
 
   access_log /var/log/nginx/{{ ansible_hostname }}-access.log timed_combined;
+
 }

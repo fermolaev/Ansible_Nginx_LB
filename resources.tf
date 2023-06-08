@@ -138,6 +138,7 @@ resource "digitalocean_droplet" "ansible" {
       "chmod 400 /tmp/key.pem",
       "ssh-add /tmp/key.pem",
       "ansible-galaxy init nginx_install",
+      "ansible-galaxy init letsencrypt",
     ]
   }
 

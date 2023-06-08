@@ -1,0 +1,15 @@
+map $sent_http_content_type $expires {
+    default                    off;
+    text/html                  epoch;
+    text/css                   max;
+    application/javascript     max;
+    ~image/                    max;
+}
+
+server {
+  listen 8080 default_server;
+  listen [::]:8080 default_server;
+  server_name {{ ansible_hostname }}.devops.rebrain.srwx.net;
+
+  expires $expires;
+}

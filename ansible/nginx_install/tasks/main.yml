@@ -5,12 +5,7 @@
     name: nginx
     state: present
     update_cache: true
-
-- name: Enable Nginx
-  systemd:
-    name: nginx
-    state: started
-    enabled: true
+  notify: Enable Nginx
       
 - name: Delete default nginx vhost
   file:
