@@ -9,4 +9,4 @@ letsencrypt_keys_dir: /etc/letsencrypt/keys
 letsencrypt_csrs_dir: /etc/letsencrypt/csrs
 letsencrypt_certs_dir: /etc/letsencrypt/certs
 letsencrypt_account_key: /etc/letsencrypt/account/account.key
-domain_name: fermolaev.devops.rebrain.srwx.net
+domain_name: "{{ ansible_hostname }}.devops.rebrain.srwx.net"

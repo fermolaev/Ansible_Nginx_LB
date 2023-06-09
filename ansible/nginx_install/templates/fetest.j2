@@ -21,6 +21,6 @@ server {
     listen 443 ssl;
 
     # RSA certificate
-    ssl_certificate /etc/letsencrypt/certs/fullchain.pem; 
-    ssl_certificate_key /etc/letsencrypt/account/account.key/
+    ssl_certificate /etc/letsencrypt/certs/fullchain_{{ ansible_hostname }}.devops.rebrain.srwx.net; 
+    ssl_certificate_key /etc/letsencrypt/keys/{{ ansible_hostname }}.devops.rebrain.srwx.net.key;
 }
