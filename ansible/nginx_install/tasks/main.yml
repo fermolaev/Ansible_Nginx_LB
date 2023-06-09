@@ -1,8 +1,9 @@
 ---
 - name: Install Nginx Web Server on RedHat Family
   yum:
-    name=nginx
-    state=latest
+    name: nginx
+    state: present
+    enabled: true
   when:
     ansible_os_family == "RedHat"
   notify:
@@ -10,8 +11,9 @@
 
 - name: Install Nginx Web Server on Debian Family
   apt:
-    name=nginx
-    state=latest
+    name: nginx
+    state: present
+    enabled: true
   when:
     ansible_os_family == "Debian"
   notify:
