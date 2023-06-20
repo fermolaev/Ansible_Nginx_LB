@@ -1,0 +1,3 @@
+---    
+- src: https://github.com/kevincoakley/ansible-role-postgres.git
+  version: master
