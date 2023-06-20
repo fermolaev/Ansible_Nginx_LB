@@ -13,9 +13,8 @@ data "digitalocean_ssh_key" "rebrain" {
   name = "REBRAIN.SSH.PUB.KEY"
 }
 
-resource "digitalocean_ssh_key" "myssh" {
-  name       = "SSH Key Terraform 2"
-  public_key = file(var.ssh_path)
+data "digitalocean_ssh_key" "myssh" {
+  name = "SSH Key Terraform 2"
 }
 
 resource "digitalocean_droplet" "vm" {
@@ -25,7 +24,7 @@ resource "digitalocean_droplet" "vm" {
   name     = var.devs[count.index]
   region   = var.region
   size     = var.vm_size
-  ssh_keys = [data.digitalocean_ssh_key.rebrain.id, digitalocean_ssh_key.myssh.fingerprint]
+  ssh_keys = [data.digitalocean_ssh_key.rebrain.id, data.digitalocean_ssh_key.myssh.id]
   tags     = var.task_email
 
   #Подключение в создаваемой VM для установки пароля 
@@ -110,7 +109,7 @@ resource "digitalocean_droplet" "ansible" {
   name       = "ansible"
   region     = var.region
   size       = var.vm_size
-  ssh_keys   = [digitalocean_ssh_key.myssh.fingerprint]
+  ssh_keys   = [data.digitalocean_ssh_key.myssh.id]
   tags       = var.task_email
 
   connection {
@@ -144,3 +143,37 @@ resource "digitalocean_droplet" "ansible" {
 }
 
 #"ansible-playbook nginx-instal.yml -i /root/hosts.yaml  --ssh-common-args='-o StrictHostKeyChecking=no'",
+
+resource "digitalocean_droplet" "vm-2" {
+  count = length(var.devs)
+
+  image    = "centos-7-x64"
+  name     = var.devs[count.index]
+  region   = var.region
+  size     = var.vm_size
+  ssh_keys = [data.digitalocean_ssh_key.rebrain.id, data.digitalocean_ssh_key.myssh.id]
+  tags     = var.task_email
+
+  #Подключение в создаваемой VM для установки пароля 
+  connection {
+    type        = var.connect_type
+    host        = self.ipv4_address
+    user        = var.vm_user
+    private_key = file(var.ssh_privat)
+    agent       = false
+  }
+
+  provisioner "file" {
+    source      = var.ssh_privat
+    destination = "/tmp/key.pem"
+  }
+
+  provisioner "remote-exec" {
+    inline = [
+      "echo ${var.vm_user}:${random_password.vm_user[count.index].result} | chpasswd",
+      "sed -i -e 's/PasswordAuthentication no/PasswordAuthentication yes/g' /etc/ssh/sshd_config",
+      "systemctl restart ssh",
+      "eval `ssh-agent -s` && chmod 400 /tmp/key.pem && ssh-add /tmp/key.pem",
+    ]
+  }
+}
