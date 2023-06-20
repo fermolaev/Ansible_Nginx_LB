@@ -4,7 +4,7 @@ pid /run/nginx.pid;
 error_log  /var/log/nginx/{{ ansible_hostname }}-error.log;
 
 events {
-  worker_connections 768;
+  worker_connections {{  worker_connections }};
   # multi_accept on;
 }
 
@@ -14,6 +14,10 @@ http {
   limit_req_zone $binary_remote_addr zone=req_limit_per_ip:10m rate=5r/s;
   
   include /etc/nginx/sites-enabled/*.conf;
+  
+  sendfile        {{ sendfile }};
+  tcp_nopush      {{ tcp_nopush }};
+  tcp_nodelay     {{ tcp_nodelay }};
 
   # Format log
   log_format timed_combined '$remote_addr - $remote_user [$time_local] '

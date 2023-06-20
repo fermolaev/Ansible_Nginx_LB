@@ -1,0 +1,8 @@
+---
+dependencies:
+  - role: nginx_install
+    vars:
+      worker_connections: 768
+      sendfile: "on"
+      tcp_nodelay: "on" ## Для состояния соединения keep-alive
+      tcp_nopush: "on"

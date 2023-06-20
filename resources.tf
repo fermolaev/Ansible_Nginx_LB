@@ -13,9 +13,8 @@ data "digitalocean_ssh_key" "rebrain" {
   name = "REBRAIN.SSH.PUB.KEY"
 }
 
-resource "digitalocean_ssh_key" "myssh" {
-  name       = "SSH Key Terraform 2"
-  public_key = file(var.ssh_path)
+data "digitalocean_ssh_key" "myssh" {
+  name = "SSH Key Terraform 2"
 }
 
 resource "digitalocean_droplet" "vm" {
@@ -25,7 +24,7 @@ resource "digitalocean_droplet" "vm" {
   name     = var.devs[count.index]
   region   = var.region
   size     = var.vm_size
-  ssh_keys = [data.digitalocean_ssh_key.rebrain.id, digitalocean_ssh_key.myssh.fingerprint]
+  ssh_keys = [data.digitalocean_ssh_key.rebrain.id, data.digitalocean_ssh_key.myssh.id]
   tags     = var.task_email
 
   #Подключение в создаваемой VM для установки пароля 
@@ -110,7 +109,7 @@ resource "digitalocean_droplet" "ansible" {
   name       = "ansible"
   region     = var.region
   size       = var.vm_size
-  ssh_keys   = [digitalocean_ssh_key.myssh.fingerprint]
+  ssh_keys   = [data.digitalocean_ssh_key.myssh.id]
   tags       = var.task_email
 
   connection {
@@ -138,6 +137,7 @@ resource "digitalocean_droplet" "ansible" {
       "chmod 400 /tmp/key.pem",
       "ssh-add /tmp/key.pem",
       "ansible-galaxy init nginx_install",
+      "ansible-galaxy init nginx_depends",
     ]
   }
 

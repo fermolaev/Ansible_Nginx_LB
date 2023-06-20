@@ -1,4 +1,4 @@
 - name: Nginx install by Roles
   hosts: nginx
   roles:
-    - nginx_install
+    - nginx_depends
