@@ -109,7 +109,7 @@ resource "digitalocean_droplet" "ansible" {
   name       = "ansible"
   region     = var.region
   size       = var.vm_size
-  ssh_keys   = data.digitalocean_ssh_key.myssh.id
+  ssh_keys   = [data.digitalocean_ssh_key.myssh.id]
   tags       = var.task_email
 
   connection {
