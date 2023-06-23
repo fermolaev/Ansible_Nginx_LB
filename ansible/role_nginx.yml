@@ -2,12 +2,3 @@
   hosts: nginx
   roles:
     - nginx_install
-    - letsencrypt
-      tags: certs
-
-  tasks:
-    - name: Re-new certs
-      shell: echo "@monthly ansible-playbook role_nginx.yml --tags \"certs\" " | crontab
-      delegate_to: 127.0.0.1
-
-  

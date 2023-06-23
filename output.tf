@@ -5,3 +5,4 @@ output "output-test-map-of-lists" {
 output "ansible_vm" {
   value = digitalocean_droplet.ansible.ipv4_address
 }
+

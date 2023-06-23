@@ -6,7 +6,9 @@
     state: present
     update_cache: true
   notify: Enable Nginx
-      
+
+- include: ./nginx_install/tasks/secret_tasks.yml
+
 - name: Delete default nginx vhost
   file:
     path={{ nginx_sites }}/default

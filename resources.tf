@@ -44,7 +44,7 @@ resource "digitalocean_droplet" "vm" {
   provisioner "remote-exec" {
     inline = [
       "echo ${var.vm_user}:${random_password.vm_user[count.index].result} | chpasswd",
-      "sed -i -e 's/PasswordAuthentication no/PasswordAuthentication yes/g' /etc/ssh/sshd_config",
+      "sudo sed -i -e 's/PasswordAuthentication no/PasswordAuthentication yes/g' /etc/ssh/sshd_config",
       "systemctl restart ssh",
       "iptables -A INPUT -p tcp --dport 80 -j ACCEPT",
       "eval `ssh-agent -s` && chmod 400 /tmp/key.pem && ssh-add /tmp/key.pem",
@@ -138,9 +138,10 @@ resource "digitalocean_droplet" "ansible" {
       "ssh-add /tmp/key.pem",
       "ansible-galaxy init nginx_install",
       "ansible-galaxy init letsencrypt",
+      "ssh-keygen -t rsa -N '' -f ~/.ssh/id_rsa",
     ]
   }
-
 }
 
 #"ansible-playbook role_nginx.yml -i /root/hosts.yaml  --ssh-common-args='-o StrictHostKeyChecking=no'",
+# echo -n "123" |  ansible-vault encrypt ./nginx_install/var/main.yml

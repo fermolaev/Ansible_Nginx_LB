@@ -1,6 +1,0 @@
----
-# handlers file for nginx_install
-- name: reloaded nginx
-  service:
-    name=nginx
-    state=reloaded
