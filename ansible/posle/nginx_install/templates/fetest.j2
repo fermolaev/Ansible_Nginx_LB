@@ -1,0 +1,21 @@
+map $sent_http_content_type $expires {
+    default                    off;
+    text/html                  epoch;
+    text/css                   max;
+    application/javascript     max;
+    ~image/                    max;
+}
+
+server {
+
+  {% for port in ports %}
+  listen {{ port }} default_server;
+  {% endfor %}
+
+  {% for port in ports %}
+  listen [::]:{{ port }} default_server;
+  {% endfor %}
+  server_name {{ ansible_hostname }}.devops.rebrain.srwx.net ;
+
+  expires $expires;
+}

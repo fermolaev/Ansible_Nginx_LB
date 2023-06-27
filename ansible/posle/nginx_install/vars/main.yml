@@ -1,0 +1,5 @@
+---
+# vars file for nginx_install
+nginx_sites: /etc/nginx/sites-available
+sites_link: /etc/nginx/sites-enabled
+ports: ['80', '81']
