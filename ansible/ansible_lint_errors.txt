@@ -1,0 +1,16 @@
+nginx_install/handlers/main.yml:7: yaml no new line character at the end of file (new-line-at-end-of-file)
+nginx_install/handlers/main.yml:7: yaml trailing spaces (trailing-spaces)
+nginx_install/meta/main.yml:1: meta-incorrect Should change default metadata: author
+nginx_install/meta/main.yml:1: meta-incorrect Should change default metadata: company
+nginx_install/meta/main.yml:1: meta-incorrect Should change default metadata: license
+nginx_install/meta/main.yml:1: meta-no-info Role info should contain platforms
+nginx_install/tasks/main.yml:14: yaml trailing spaces (trailing-spaces)
+nginx_install/tasks/main.yml:21: risky-file-permissions File permissions unset or incorrect
+nginx_install/tasks/main.yml:27: risky-file-permissions File permissions unset or incorrect
+nginx_install/tasks/main.yml:32: yaml too many spaces inside braces (braces)
+nginx_install/tasks/main.yml:33: yaml too many spaces inside braces (braces)
+nginx_install/tasks/main.yml:42: yaml too many spaces inside braces (braces)
+nginx_install/tasks/main.yml:43: yaml too many spaces inside braces (braces)
+nginx_install/tasks/main.yml:44: yaml no new line character at the end of file (new-line-at-end-of-file)
+nginx_install/vars/main.yml:5: yaml no new line character at the end of file (new-line-at-end-of-file)
+nginx_install/vars/main.yml:5: yaml too few spaces after comma (commas)
