@@ -97,13 +97,11 @@ data "aws_route53_zone" "rebrain" {
 }
 
 resource "aws_route53_record" "www" {
-  count = length(var.devs)
-
   zone_id = data.aws_route53_zone.rebrain.zone_id
-  name    = var.devs[count.index]
+  name    = "fermolaev"
   type    = var.dns_type
   ttl     = var.ttl
-  records = [local.do_ip_droplet[count.index]]
+  records = [digitalocean_droplet.lb.ipv4_address]
 }
 
 #----------| Ansible Files |------------
@@ -128,7 +126,7 @@ resource "local_file" "nginx_lb_conf" {
 resource "local_file" "stats" {
   content = templatefile("${path.module}/templates/all_data.sh.tpl", {
     password = [for pass in random_password.vm_user[*] : pass.result]
-    fqdn     = aws_route53_record.www[*].fqdn
+    fqdn     = aws_route53_record.www.fqdn
     ip       = digitalocean_droplet.vm[*].ipv4_address
   })
   filename = "${path.module}/vm_info.txt"
@@ -136,7 +134,7 @@ resource "local_file" "stats" {
 
 locals {
   all_data = [for index, pass in [for pass in random_password.vm_user : nonsensitive(pass.result)] :
-  "${index + 1}: ${format("%s %s %s", aws_route53_record.www[index].fqdn, digitalocean_droplet.vm[index].ipv4_address, pass)}"]
+  "${index + 1}: ${format("%s %s %s", aws_route53_record.www.fqdn, digitalocean_droplet.vm[index].ipv4_address, pass)}"]
 }
 
 #--------------------------------------------------------

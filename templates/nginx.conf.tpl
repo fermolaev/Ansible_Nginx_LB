@@ -24,7 +24,6 @@ http {
           include proxy_params;
           
           proxy_pass http://app;
-          health_check;
           proxy_redirect off;
           proxy_http_version 1.1;
           proxy_set_header Upgrade $http_upgrade;
