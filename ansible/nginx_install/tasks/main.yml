@@ -7,8 +7,6 @@
     update_cache: true
   notify: Enable Nginx
 
-- include: ./nginx_install/tasks/secret_tasks.yml
-
 - name: Delete default nginx vhost
   file:
     path={{ nginx_sites }}/default
@@ -38,4 +36,11 @@
   loop:
     - { src: '{{ nginx_sites }}/fetest.conf', dest: '{{ sites_link }}/fetest.conf' }
     - { src: '{{ nginx_sites }}/fetest_rezerv.conf', dest: '{{ sites_link }}/fetest_rezerv.conf' }
+  notify: reloaded nginx
+
+  - name: Copy certs
+  copy:
+    src: ./ssl
+    dest: /etc/nginx/
+    mode: 640
   notify: reloaded nginx

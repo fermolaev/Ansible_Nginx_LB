@@ -7,7 +7,7 @@ resource "random_password" "vm_user" {
   override_special = var.pass_strong
 }
 
-#----------| Digital Ocean Droplet + SSH |------------
+#----------| Digital Ocean Droplet Data |------------
 
 data "digitalocean_ssh_key" "rebrain" {
   name = "REBRAIN.SSH.PUB.KEY"
@@ -16,6 +16,8 @@ data "digitalocean_ssh_key" "rebrain" {
 data "digitalocean_ssh_key" "myssh" {
   name = "SSH Key Terraform 2"
 }
+
+#----------| Web Servers |------------
 
 resource "digitalocean_droplet" "vm" {
   count = length(var.devs)
@@ -56,6 +58,38 @@ locals {
   do_ip_droplet = digitalocean_droplet.vm[*].ipv4_address
 }
 
+#----------| Nginx Load Balancer |------------
+
+resource "digitalocean_droplet" "lb" {
+  image    = var.os
+  name     = "lb"
+  region   = var.region
+  size     = var.vm_size
+  ssh_keys = [data.digitalocean_ssh_key.rebrain.id, data.digitalocean_ssh_key.myssh.id]
+  tags     = var.task_email
+
+  #Подключение в создаваемой VM для установки пароля 
+  connection {
+    type        = var.connect_type
+    host        = self.ipv4_address
+    user        = var.vm_user
+    private_key = file(var.ssh_privat)
+    agent       = false
+  }
+
+  provisioner "file" {
+    source      = var.ssh_privat
+    destination = "/tmp/key.pem"
+  }
+
+  provisioner "remote-exec" {
+    inline = [
+      "iptables -A INPUT -p tcp --dport 80 -j ACCEPT",
+      "eval `ssh-agent -s` && chmod 400 /tmp/key.pem && ssh-add /tmp/key.pem",
+    ]
+  }
+}
+
 #----------| AWS 53 DNS |------------
 
 data "aws_route53_zone" "rebrain" {
@@ -77,8 +111,16 @@ resource "aws_route53_record" "www" {
 resource "local_file" "hosts_cfg" {
   content = templatefile("${path.module}/templates/hosts.tpl", {
     nginx_ip = digitalocean_droplet.vm[*].ipv4_address
+    lb_ip    = digitalocean_droplet.lb.ipv4_address
   })
   filename = "${path.module}/ansible/nginx/hosts.yaml"
+}
+
+resource "local_file" "nginx_lb_conf" {
+  content = templatefile("${path.module}/templates/nginx.conf.tpl", {
+    nginx_ip = digitalocean_droplet.vm[*].ipv4_address
+  })
+  filename = "${path.module}/ansible/nginx_load_balancer/templates/nginx.conf.j2"
 }
 
 #----------| Output STATS |------------
@@ -133,12 +175,10 @@ resource "digitalocean_droplet" "ansible" {
   provisioner "remote-exec" {
     inline = [
       "apt install ansible -y ",
-      "eval `ssh-agent -s`",
-      "chmod 400 /tmp/key.pem",
-      "ssh-add /tmp/key.pem",
+      "eval `ssh-agent -s` && chmod 400 /tmp/key.pem && ssh-add /tmp/key.pem",
       "ansible-galaxy init nginx_install",
-      "ansible-galaxy init letsencrypt",
-      "ssh-keygen -t rsa -N '' -f ~/.ssh/id_rsa",
+      "ansible-galaxy init nginx_load_balancer",
+
     ]
   }
 }

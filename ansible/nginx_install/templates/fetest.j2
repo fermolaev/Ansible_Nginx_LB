@@ -15,12 +15,12 @@ server {
   {% for port in ports %}
   listen [::]:{{ port }} default_server;
   {% endfor %}
-  server_name {{ ansible_hostname }}.devops.rebrain.srwx.net ;
+  server_name fermolaev.devops.rebrain.srwx.net ;
 
     # SSL Blok
     listen 443 ssl;
 
     # RSA certificate
-    ssl_certificate /etc/nginx/ssl/fullchain_{{ ansible_hostname }}.devops.rebrain.srwx.net; 
-    ssl_certificate_key /etc/nginx/ssl/{{ ansible_hostname }}.devops.rebrain.srwx.net.key;
+    ssl_certificate /etc/nginx/ssl/fullchain_fermolaev.devops.rebrain.srwx.net; 
+    ssl_certificate_key /etc/nginx/ssl/fermolaev.devops.rebrain.srwx.net.key;
 }
