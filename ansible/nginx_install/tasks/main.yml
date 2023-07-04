@@ -19,6 +19,12 @@
     dest=/etc/nginx/nginx.conf
   notify: reloaded nginx
 
+- name: Setup index.html
+  template:
+    src=index.html.j2
+    dest=/usr/share/nginx/html/index.html
+  notify: reloaded nginx
+
 - name: Setup nginx vhost
   template:
     src={{ item.src }}
@@ -38,9 +44,3 @@
     - { src: '{{ nginx_sites }}/fetest_rezerv.conf', dest: '{{ sites_link }}/fetest_rezerv.conf' }
   notify: reloaded nginx
 
-  - name: Copy certs
-  copy:
-    src: ./ssl
-    dest: /etc/nginx/
-    mode: 640
-  notify: reloaded nginx

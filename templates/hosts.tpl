@@ -1,7 +1,8 @@
 nginx:
   hosts:
-%{ for ip in nginx_ip ~}
-    ${ip}
+%{ for idx, ip in nginx_ip ~}
+    Nginx-${idx +1}:
+      ansible_host: ${ip}
 %{ endfor ~}
 nginxlb:
   hosts:

@@ -17,47 +17,6 @@ data "digitalocean_ssh_key" "myssh" {
   name = "SSH Key Terraform 2"
 }
 
-#----------| Web Servers |------------
-
-resource "digitalocean_droplet" "vm" {
-  count = length(var.devs)
-
-  image    = var.os
-  name     = var.devs[count.index]
-  region   = var.region
-  size     = var.vm_size
-  ssh_keys = [data.digitalocean_ssh_key.rebrain.id, data.digitalocean_ssh_key.myssh.id]
-  tags     = var.task_email
-
-  #Подключение в создаваемой VM для установки пароля 
-  connection {
-    type        = var.connect_type
-    host        = self.ipv4_address
-    user        = var.vm_user
-    private_key = file(var.ssh_privat)
-    agent       = false
-  }
-
-  provisioner "file" {
-    source      = var.ssh_privat
-    destination = "/tmp/key.pem"
-  }
-
-  provisioner "remote-exec" {
-    inline = [
-      "echo ${var.vm_user}:${random_password.vm_user[count.index].result} | chpasswd",
-      "sudo sed -i -e 's/PasswordAuthentication no/PasswordAuthentication yes/g' /etc/ssh/sshd_config",
-      "systemctl restart ssh",
-      "iptables -A INPUT -p tcp --dport 80 -j ACCEPT",
-      "eval `ssh-agent -s` && chmod 400 /tmp/key.pem && ssh-add /tmp/key.pem",
-    ]
-  }
-}
-
-locals {
-  do_ip_droplet = digitalocean_droplet.vm[*].ipv4_address
-}
-
 #----------| Nginx Load Balancer |------------
 
 resource "digitalocean_droplet" "lb" {
@@ -90,6 +49,46 @@ resource "digitalocean_droplet" "lb" {
   }
 }
 
+#----------| Web Servers |------------
+
+resource "digitalocean_droplet" "vm" {
+  depends_on = [digitalocean_droplet.lb]
+  count      = length(var.devs)
+  image      = var.os
+  name       = var.devs[count.index]
+  region     = var.region
+  size       = var.vm_size
+  ssh_keys   = [data.digitalocean_ssh_key.rebrain.id, data.digitalocean_ssh_key.myssh.id]
+  tags       = var.task_email
+
+  #Подключение в создаваемой VM для установки пароля 
+  connection {
+    type        = var.connect_type
+    host        = self.ipv4_address
+    user        = var.vm_user
+    private_key = file(var.ssh_privat)
+    agent       = false
+  }
+
+  provisioner "file" {
+    source      = var.ssh_privat
+    destination = "/tmp/key.pem"
+  }
+
+  provisioner "remote-exec" {
+    inline = [
+      "echo ${var.vm_user}:${random_password.vm_user[count.index].result} | chpasswd",
+      "sudo sed -i -e 's/PasswordAuthentication no/PasswordAuthentication yes/g' /etc/ssh/sshd_config",
+      "systemctl restart ssh",
+      "eval `ssh-agent -s` && chmod 400 /tmp/key.pem && ssh-add /tmp/key.pem",
+    ]
+  }
+}
+
+locals {
+  do_ip_droplet = digitalocean_droplet.vm[*].ipv4_address
+}
+
 #----------| AWS 53 DNS |------------
 
 data "aws_route53_zone" "rebrain" {
@@ -111,7 +110,7 @@ resource "local_file" "hosts_cfg" {
     nginx_ip = digitalocean_droplet.vm[*].ipv4_address
     lb_ip    = digitalocean_droplet.lb.ipv4_address
   })
-  filename = "${path.module}/ansible/nginx/hosts.yaml"
+  filename = "${path.module}/ansible/hosts.yaml"
 }
 
 resource "local_file" "nginx_lb_conf" {
@@ -161,11 +160,6 @@ resource "digitalocean_droplet" "ansible" {
   }
 
   provisioner "file" {
-    source      = "${path.module}/ansible/nginx/hosts.yaml"
-    destination = "/root/hosts.yaml"
-  }
-
-  provisioner "file" {
     source      = var.ssh_privat
     destination = "/tmp/key.pem"
   }
@@ -173,13 +167,25 @@ resource "digitalocean_droplet" "ansible" {
   provisioner "remote-exec" {
     inline = [
       "apt install ansible -y ",
-      "eval `ssh-agent -s` && chmod 400 /tmp/key.pem && ssh-add /tmp/key.pem",
       "ansible-galaxy init nginx_install",
       "ansible-galaxy init nginx_load_balancer",
+    ]
+  }
 
+  provisioner "file" {
+    source      = "${path.module}/ansible/"
+    destination = "/root"
+  }
+
+  provisioner "remote-exec" {
+    inline = [
+      "eval `ssh-agent -s` && chmod 400 /tmp/key.pem && ssh-add /tmp/key.pem",
+      "ansible-playbook role_nginx.yml -i hosts.yaml  --ssh-common-args='-o StrictHostKeyChecking=no'",
+      "ansible-playbook nginxlb.yml -i hosts.yaml  --ssh-common-args='-o StrictHostKeyChecking=no'",
     ]
   }
 }
 
-#"ansible-playbook role_nginx.yml -i /root/hosts.yaml  --ssh-common-args='-o StrictHostKeyChecking=no'",
+#"ansible-playbook role_nginx.yml -i hosts.yaml  --ssh-common-args='-o StrictHostKeyChecking=no'",
+#"ansible-playbook nginxlb.yml -i hosts.yaml  --ssh-common-args='-o StrictHostKeyChecking=no'",
 # echo -n "123" |  ansible-vault encrypt ./nginx_install/var/main.yml

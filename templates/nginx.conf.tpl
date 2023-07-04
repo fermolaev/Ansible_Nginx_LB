@@ -16,9 +16,13 @@ http {
    }
 
    server {
-      listen 80;
-      
+      listen 443 ssl;
       server_name fermolaev.devops.rebrain.srwx.net;
+      
+      ssl on;
+      ssl_certificate /etc/nginx/ssl/fullchain_fermolaev.devops.rebrain.srwx.net; 
+      ssl_certificate_key /etc/nginx/ssl/fermolaev.devops.rebrain.srwx.net.key;
+
 
       location / {
           include proxy_params;
@@ -30,3 +34,4 @@ http {
           proxy_set_header Connection "upgrade";
       }
    }
+}
